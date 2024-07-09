@@ -136,6 +136,7 @@ func addHandleFunc(url string) {
 
 			//コマンドに応じた処理をする
 			if cmdType == "roomMatch" && cmdLen == 2 { //マッチングコマンド。想定コマンド = "roomMatch ルームキー"
+				plData.roomKey = cmd[1]
 				roomKey = cmd[1]
 
 				if !isRoom(roomKey) { //部屋が無いなら作る
