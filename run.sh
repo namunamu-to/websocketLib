@@ -1,0 +1,1 @@
+sudo go run main.go data.go handllers.go
