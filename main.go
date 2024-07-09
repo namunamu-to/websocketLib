@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/tls"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -12,6 +11,8 @@ import (
 )
 
 var accessLogFilepath = "./data/accessLog.txt"
+
+var addedHandllers []func(plData player, msg string)
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -104,7 +105,7 @@ func sendMsgToAnother(roomKey string, exceptPl player, msg string) {
 	sendMsg(rooms[roomKey].players[toIdx].conn, msg)
 }
 
-func addHandleFunc(url string, fn func()) {
+func addHandleFunc(url string) {
 	handller := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "https://galleon.yachiyo.tech")
 
@@ -117,24 +118,21 @@ func addHandleFunc(url string, fn func()) {
 		WriteFileAppend(accessLogFilepath, log)
 
 		// 無限ループさせることでクライアントからのメッセージを受け付けられる状態にする
-		plData := player{uid: MakeUuid(), name: "", roomKey: "matching", conn: conn}
+		plData := player{uid: MakeUuid(), name: "", roomKey: "", conn: conn}
 		roomKey := plData.roomKey
 
 		for {
 			_, msg, err := conn.ReadMessage()
 			if err != nil { //通信終了時の処理
-				if roomKey == "matching" {
-					break
+				if roomKey != "" {
+					exitRoom(roomKey, plData) //部屋から抜ける
 				}
 
-				exitRoom(roomKey, plData) //部屋から抜ける
 				break
 			}
 
 			//msgのコマンド読み取り
 			cmd, cmdType, cmdLen := readCmd(string(msg))
-			playerNum := 0
-			println("ルーム内プレイヤー数", playerNum)
 
 			//コマンドに応じた処理をする
 			if cmdType == "roomMatch" && cmdLen == 2 { //マッチングコマンド。想定コマンド = "roomMatch ルームキー"
@@ -145,13 +143,13 @@ func addHandleFunc(url string, fn func()) {
 					makeRoom(roomKey)
 				}
 
-				playerNum = len(rooms[roomKey].players)
 				enterRoom(roomKey, plData)
-				bloadcastMsg(roomKey, "playerNum "+strconv.Itoa(playerNum))
-				sendMsgToAnother(roomKey, plData, "なんか来たw")
 			}
 
-			fn()
+			for i := 0; i < len(addedHandllers); i++ {
+				addedHandllers[i](plData, string(msg))
+			}
+
 		}
 
 	}
@@ -162,7 +160,9 @@ func addHandleFunc(url string, fn func()) {
 func main() {
 	// ハンドラの設定
 	mux = http.NewServeMux() //ミューテックス。すでに起動してるか確認。
-	addHandleFunc("/shogi/websocketLib", func() { println("ハンドル実行") })
+
+	SetHandllers()
+	addHandleFunc("/shogi/websocketLib")
 
 	//tls設定
 	cfg := &tls.Config{
