@@ -17,9 +17,9 @@ var addedHandllers []func(plData player, msg string)
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	// CheckOrigin: func(r *http.Request) bool {
-	// 	return true
-	// },
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
 type player struct {
@@ -162,7 +162,7 @@ func main() {
 	mux = http.NewServeMux() //ミューテックス。すでに起動してるか確認。
 
 	SetHandllers()
-	addHandleFunc("/shogi/websocketLib")
+	addHandleFunc("/test")
 
 	//tls設定
 	cfg := &tls.Config{
