@@ -1,1 +1,1 @@
-sudo go run main.go data.go handllers.go
+sudo go run main.go data.go server.go
