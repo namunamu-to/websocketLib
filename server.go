@@ -23,8 +23,8 @@ var upgrader = websocket.Upgrader{
 }
 
 type player struct {
-	uid, name, roomKey string
-	conn               *websocket.Conn
+	uid, name, roomKey, category string
+	conn                         *websocket.Conn
 }
 
 type room struct {
@@ -52,10 +52,13 @@ func getPlayerIdx(roomKey string, uid string) int {
 }
 
 func enterRoom(roomKey string, player *player) {
+	roomKey += player.category
 	if !isRoom(roomKey) { //部屋が無いなら作る
 		sendMsg(player.conn, "部屋作った")
 		makeRoom(roomKey)
 	}
+
+	println(roomKey)
 
 	idx := getPlayerIdx(roomKey, player.uid)
 	if idx == -1 { //まだ自分が部屋に入ってなかったら追加
@@ -63,6 +66,7 @@ func enterRoom(roomKey string, player *player) {
 		player.roomKey = roomKey
 		sendMsg(player.conn, "入室")
 	}
+	println(roomKey)
 }
 
 func exitRoom(roomKey string, plData *player) {
@@ -127,7 +131,7 @@ func initHandle(url string) {
 		WriteFileAppend(accessLogFilepath, log)
 
 		// 無限ループさせることでクライアントからのメッセージを受け付けられる状態にする
-		plData := player{uid: MakeUuid(), name: "", roomKey: "default", conn: conn}
+		plData := player{uid: MakeUuid(), name: "", roomKey: "default", category: "default", conn: conn}
 		enterRoom(plData.roomKey, &plData)
 		// roomKey := plData.roomKey
 
@@ -145,8 +149,9 @@ func initHandle(url string) {
 			cmd, cmdType, cmdLen := readCmd(string(msg))
 
 			//コマンドに応じた処理をする
-			if cmdType == "moveRoom" && cmdLen == 2 { //マッチングコマンド。想定コマンド = "roomMatch ルームキー"
-				moveRoom(cmd[1], &plData)
+			if cmdType == "moveRoom" && cmdLen == 3 { //マッチングコマンド。想定コマンド = "roomMatch category ルームキー"
+				plData.category = cmd[1]
+				moveRoom(cmd[2], &plData)
 			}
 
 			for i := 0; i < len(addedHandllers); i++ {
