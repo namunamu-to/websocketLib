@@ -40,6 +40,7 @@ func handllerEx4(plData player, msg string) {
 	sendMsg(plData.conn, "ルーム人数 : "+strconv.Itoa(response))
 }
 
+// チャット
 func handllerEx5(plData player, msg string) {
 	_, cmdType, _ := readCmd(msg)
 	if cmdType != "chat" {
@@ -57,10 +58,10 @@ func handllerEx5(plData player, msg string) {
 }
 
 func main() {
-	// addedHandllers = append(addedHandllers, handllerEx1)
-	addedHandllers = append(addedHandllers, handllerEx2)
-	addedHandllers = append(addedHandllers, handllerEx3)
-	addedHandllers = append(addedHandllers, handllerEx4)
-	addedHandllers = append(addedHandllers, handllerEx5)
-	startServer()
+	addHandller(handllerEx2)
+	addHandller(handllerEx3)
+	addHandller(handllerEx4)
+	addHandller(handllerEx5)
+	addHandller(mashGame)
+	startServer("/test", "8444", "./fullchain.pem", "./privkey.pem")
 }

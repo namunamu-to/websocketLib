@@ -114,7 +114,7 @@ func sendMsgToAnother(roomKey string, exceptPl player, msg string) {
 	sendMsg(rooms[roomKey].players[toIdx].conn, msg)
 }
 
-func addHandleFunc(url string) {
+func initHandle(url string) {
 	handller := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "https://galleon.yachiyo.tech")
 
@@ -159,12 +159,15 @@ func addHandleFunc(url string) {
 	mux.HandleFunc(url, handller)
 }
 
-func startServer() {
+func addHandller(fn func(plData player, msg string)) {
+	addedHandllers = append(addedHandllers, fn)
+}
+
+func startServer(url string, port string, fullchainPath string, privkeyPath string) {
 	// ハンドラの設定
 	mux = http.NewServeMux() //ミューテックス。すでに起動してるか確認。
 
-	// setHandllers()
-	addHandleFunc("/test")
+	initHandle(url)
 
 	//tls設定
 	cfg := &tls.Config{
@@ -173,13 +176,13 @@ func startServer() {
 
 	//サーバー設定
 	srv := http.Server{
-		Addr:      ":8444",
+		Addr:      ":" + port,
 		Handler:   mux,
 		TLSConfig: cfg,
 	}
 
 	println("サーバー起動")
-	err := srv.ListenAndServeTLS("./fullchain.pem", "./privkey.pem")
+	err := srv.ListenAndServeTLS(fullchainPath, privkeyPath)
 	if err != nil {
 		println("サーバー起動に失敗")
 		println(err.Error())

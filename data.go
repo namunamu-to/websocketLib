@@ -50,23 +50,16 @@ func SliceToCsvStr(csv [][]string) string {
 	csvLines := []string{}
 	for _, csvLine := range csv {
 		csvLines = append(csvLines, strings.Join(csvLine, ","))
-
 	}
 
 	return strings.Join(csvLines, "\n")
 }
 
 func WriteCsv(filepath string, csv [][]string) {
-	// csvLines := []string{}
-	// for _, csvLine := range csv {
-	// 	csvLines = append(csvLines, strings.Join(csvLine, ","))
-
-	// }
-
-	// WriteFile(filepath, strings.Join(csvLines, "\n"))
 	WriteFile(filepath, SliceToCsvStr(csv))
 }
 
+// func JsonToMap(jsonString string, jsonStc json) (map[string]string, error) {
 func JsonToMap(jsonString string) (map[string]string, error) {
 	var data map[string]string
 	if err := json.Unmarshal([]byte(jsonString), &data); err != nil {

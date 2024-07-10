@@ -1,0 +1,24 @@
+package main
+
+func shogi(plData player, msg string) {
+	// func shogi(w http.ResponseWriter, r *http.Request) {
+	println("aaa")
+	// jsonStr := `
+	// 	{
+	// 		game : "shogi",
+	// 		cmd : {
+	// 			type : move,
+	// 			x : 2,
+	// 			y, 5 ,
+	// 		}
+	// 	}
+	// `
+	// json, err := JsonToMap(jsonStr)
+	// if err != nil {
+	// println(err)
+	// }
+
+	// println(json["game"])
+	// println(json["cmd"])
+
+}
