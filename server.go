@@ -195,3 +195,9 @@ func startServer(url string, port string, fullchainPath string, privkeyPath stri
 
 	makeRoom("default")
 }
+
+// 部屋移動のデータ構造
+// moveRoom category roomKey
+type Json struct {
+	cmd, category, roomKey string
+}

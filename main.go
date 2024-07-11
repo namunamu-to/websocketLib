@@ -62,6 +62,6 @@ func main() {
 	addHandller(handllerEx3)
 	addHandller(handllerEx4)
 	addHandller(handllerEx5)
-	addHandller(mashGame)
+	// addHandller(mashGame)
 	startServer("/test", "8444", "./fullchain.pem", "./privkey.pem")
 }
